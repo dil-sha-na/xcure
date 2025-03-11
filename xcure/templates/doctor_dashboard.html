@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XCURE - Doctor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: rgba(20, 184, 166, 0.95);
+            padding: 15px 0;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-brand {
+            color: white;
+            font-size: 24px;
+            font-weight: 900;
+            text-decoration: none;
+            letter-spacing: 2px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .doctor-name {
+            color: white;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: white;
+            color: #14b8a6;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #f1f1f1;
+        }
+
+        .dashboard-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            min-height: 600px;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            padding: 30px;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .sidebar-title {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #14b8a6;
+        }
+
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            background: transparent;
+            border: 2px solid #14b8a6;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .menu-btn:hover, .menu-btn.active {
+            background: #14b8a6;
+        }
+
+        .content-container {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #14b8a6;
+        }
+
+        /* Add Patient Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: #14b8a6;
+            outline: none;
+        }
+
+        .submit-btn {
+            padding: 14px 28px;
+            background: #14b8a6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #0d9488;
+        }
+
+        /* Patient List Styles */
+        .patient-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .patient-table th, .patient-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .patient-table th {
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .patient-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .view-btn {
+            background: #14b8a6;
+            color: white;
+        }
+
+        .edit-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .search-form {
+            max-width: 500px;
+            margin-bottom: 30px;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input-group input {
+            flex: 1;
+        }
+
+        .search-input-group .submit-btn {
+            width: auto;
+            padding: 12px 24px;
+        }
+
+        .patient-details {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .details-title {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #14b8a6;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .detail-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detail-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            background: #fdf2f2;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">XCURE DOCTOR DASHBOARD</a>
+            <div class="nav-right">
+                <span class="doctor-name">Dr. {{ doctor_name }}</span>
+                <a href="/logout" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h2 class="sidebar-title">Dashboard Menu</h2>
+            <button class="menu-btn {% if not active_section or active_section == 'add-patient' %}active{% endif %}" onclick="showContent('add-patient')">Add New Patient</button>
+            <button class="menu-btn {% if active_section == 'view-patients' %}active{% endif %}" onclick="showContent('view-patients')">View Full Patient Details</button>
+            <button class="menu-btn {% if active_section == 'patient-search' %}active{% endif %}" onclick="showContent('patient-search')">Patient Search</button>
+        </div>
+
+        <div class="content-container">
+            <!-- Add Patient Section -->
+            <div class="content-section {% if not active_section or active_section == 'add-patient' %}active{% endif %}" id="add-patient">
+                <h2 class="section-title">Add New Patient</h2>
+                <form id="add-patient-form" action="/add-patient" method="POST">
+                    <div class="form-group">
+                        <label for="patient-id">Patient ID</label>
+                        <input type="text" id="patient-id" name="patient_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patient-name">Patient Name</label>
+                        <input type="text" id="patient-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patient-age">Age</label>
+                        <input type="number" id="patient-age" name="age" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="blood-group">Blood Group</label>
+                        <select id="blood-group" name="blood_group" required>
+                            <option value="">Select Blood Group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" name="weight" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" name="height" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="disease">Disease/Condition</label>
+                        <textarea id="disease" name="disease" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required 
+                               pattern="[0-9]{10}" 
+                               oninput="validatePhone(this)"
+                               placeholder="Enter 10-digit phone number">
+                        <span id="phone-error" class="error-message" style="display: none; font-size: 14px; margin-top: 5px;">Phone number must be exactly 10 digits</span>
+                    </div>
+                    <button type="submit" class="submit-btn">Add Patient</button>
+                </form>
+            </div>
+
+            <!-- View Patients Section -->
+            <div class="content-section {% if active_section == 'view-patients' %}active{% endif %}" id="view-patients">
+                <h2 class="section-title">View Patient Details</h2>
+                <form id="search-patient-form" action="/search-patient" method="POST" class="search-form">
+                    <div class="form-group">
+                        <label for="search-patient-id">Patient ID</label>
+                        <div class="search-input-group">
+                            <input type="text" id="search-patient-id" name="patient_id" required placeholder="Enter Patient ID to search">
+                            <button type="submit" class="submit-btn">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Patient Details Section (shown after search) -->
+                {% if patient %}
+                <div class="patient-details">
+                    <h3 class="details-title">Patient Information</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Patient ID:</span>
+                            <span class="detail-value">{{ patient.patient_id }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Name:</span>
+                            <span class="detail-value">{{ patient.name }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Age:</span>
+                            <span class="detail-value">{{ patient.age }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Blood Group:</span>
+                            <span class="detail-value">{{ patient.blood_group }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Weight:</span>
+                            <span class="detail-value">{{ patient.weight }} kg</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Height:</span>
+                            <span class="detail-value">{{ patient.height }} cm</span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Disease/Condition:</span>
+                            <span class="detail-value">{{ patient.disease }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Phone Number:</span>
+                            <span class="detail-value">{{ patient.phone }}</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn edit-btn" onclick="location.href='/edit-patient/{{ patient.patient_id }}'">Edit Details</button>
+                        <button class="action-btn delete-btn" onclick="confirmDelete('{{ patient.patient_id }}')">Delete Patient</button>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if error %}
+                <div class="error-message">{{ error }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Patient Search Section -->
+            <div class="content-section {% if active_section == 'patient-search' %}active{% endif %}" id="patient-search">
+                <h2 class="section-title">Patient Search</h2>
+                <form id="limited-search-form" action="/limited-search" method="POST" class="search-form">
+                    <div class="form-group">
+                        <label for="limited-search-patient-id">Patient ID</label>
+                        <div class="search-input-group">
+                            <input type="text" id="limited-search-patient-id" name="patient_id" required placeholder="Enter Patient ID to search">
+                            <button type="submit" class="submit-btn">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Limited Patient Details Section (shown after search) -->
+                {% if limited_patient %}
+                <div class="patient-details">
+                    <h3 class="details-title">Patient Information</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Age:</span>
+                            <span class="detail-value">{{ limited_patient.age }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Blood Group:</span>
+                            <span class="detail-value">{{ limited_patient.blood_group }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Weight:</span>
+                            <span class="detail-value">{{ limited_patient.weight }} kg</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Height:</span>
+                            <span class="detail-value">{{ limited_patient.height }} cm</span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Disease/Condition:</span>
+                            <span class="detail-value">{{ limited_patient.disease }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if search_error %}
+                <div class="error-message">{{ search_error }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showContent(section) {
+            // Update active button
+            document.querySelectorAll('.menu-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show selected content
+            document.querySelectorAll('.content-section').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(section).classList.add('active');
+        }
+
+        function confirmDelete(patientId) {
+            if (confirm('Are you sure you want to delete this patient record?')) {
+                location.href = '/delete-patient/' + patientId;
+            }
+        }
+
+        function validatePhone(input) {
+            const phoneError = document.getElementById('phone-error');
+            const submitBtn = document.querySelector('#add-patient-form button[type="submit"]');
+            
+            // Remove any non-digit characters
+            let phoneNumber = input.value.replace(/\D/g, '');
+            
+            // Update input value to show only digits
+            input.value = phoneNumber;
+            
+            // Check if the phone number is exactly 10 digits
+            if (phoneNumber.length !== 10) {
+                phoneError.style.display = 'block';
+                input.style.borderColor = '#e74c3c';
+                submitBtn.disabled = true;
+            } else {
+                phoneError.style.display = 'none';
+                input.style.borderColor = '#14b8a6';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Add form submission validation
+        document.getElementById('add-patient-form').addEventListener('submit', function(event) {
+            const phoneInput = document.getElementById('phone');
+            const phoneNumber = phoneInput.value.replace(/\D/g, '');
+            
+            if (phoneNumber.length !== 10) {
+                event.preventDefault();
+                document.getElementById('phone-error').style.display = 'block';
+                phoneInput.style.borderColor = '#e74c3c';
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Patient Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .search-form {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .patient-details {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .detail-label {
+            font-weight: bold;
+            width: 150px;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .not-found {
+            text-align: center;
+            color: #e74c3c;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Patient Details</h1>
+        <form method="POST" class="search-form">
+            <input type="number" name="user_id" placeholder="Enter Patient ID" required>
+            <button type="submit" class="button">Search</button>
+        </form>
+
+        {% if patient %}
+        <div class="patient-details">
+            <div class="detail-row">
+                <span class="detail-label">Patient ID:</span>
+                <span>{{ patient.id }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Name:</span>
+                <span>{{ patient.name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Age:</span>
+                <span>{{ patient.age }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Blood Group:</span>
+                <span>{{ patient.blood_group }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Weight:</span>
+                <span>{{ patient.weight }} kg</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Height:</span>
+                <span>{{ patient.height }} cm</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Disease:</span>
+                <span>{{ patient.disease }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Phone Number:</span>
+                <span>{{ patient.phone }}</span>
+            </div>
+        </div>
+        {% elif request.method == 'POST' %}
+        <div class="not-found">
+            Patient not found with the provided ID.
+        </div>
+        {% endif %}
+
+        <div class="button-container">
+            <a href="{{ url_for('index') }}" class="button">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html> 

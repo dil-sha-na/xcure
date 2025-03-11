@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% block inline_css %}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.navbar {
+    background-color: rgba(20, 184, 166, 0.95);
+    padding: 15px 0;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.nav-brand {
+    color: white;
+    font-size: 24px;
+    font-weight: 900;
+    text-decoration: none;
+    letter-spacing: 2px;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.back-btn {
+    padding: 8px 16px;
+    background: white;
+    color: #14b8a6;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.back-btn:hover {
+    background: #f1f1f1;
+}
+
+.dashboard-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    min-height: 600px;
+}
+
+.sidebar {
+    width: 280px;
+    background: #2c3e50;
+    padding: 30px;
+    border-radius: 10px 0 0 10px;
+}
+
+.sidebar-title {
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #14b8a6;
+}
+
+.login-type-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: transparent;
+    border: 2px solid #14b8a6;
+    color: white;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.login-type-btn.active {
+    background: #14b8a6;
+}
+
+.login-type-btn:hover {
+    background: #14b8a6;
+}
+
+.content-container {
+    flex: 1;
+    padding: 40px;
+}
+
+.section-title {
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #14b8a6;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    max-width: 400px;
+}
+
+.form-group label {
+    display: block;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #14b8a6;
+    outline: none;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #14b8a6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 20px;
+}
+
+.submit-btn:hover {
+    background: #0d9488;
+}
+
+.error-message {
+    color: #e74c3c;
+    background: #fdf2f2;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.login-section {
+    display: none; 
+}
+
+.login-section.active {
+    display: block;
+}
+
+.login-type-btn.active {
+    background: #14b8a6;
+    color: white;
+}
+
+
+{% endblock inline_css %}
+{% block body %}
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">XCURE</a>
+            <div class="nav-right">
+                <a href="/" class="back-btn">Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h2 class="sidebar-title">Select Login Type</h2>
+            <button class="login-type-btn active" onclick="showLoginForm('doctor', event)">Doctor</button>
+            <button class="login-type-btn" onclick="showLoginForm('patient', event)">Patient</button>            
+        </div>
+
+        <div class="content-container">
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="error-message">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Doctor Login Section -->
+            <div id="doctor-login" class="login-section active">
+                <h2 class="section-title">Doctor Login</h2>
+                <form method="POST" action="{{ url_for("doctor_login") }}">
+                    {{ doctor_form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ doctor_form.doctor_id.label }}
+                        {{ doctor_form.doctor_id(class="form-control", placeholder="Enter your Doctor ID") }}
+                    </div>
+                    <div class="form-group">
+                        {{ doctor_form.password.label }}
+                        {{ doctor_form.password(class="form-control", placeholder="Enter your password") }}
+                    </div>
+                    {{ doctor_form.submit(class="submit-btn") }}
+                </form>
+            </div>
+
+            <!-- Patient Login Section -->
+            <div id="patient-login" class="login-section">
+                <h2 class="section-title">Patient Login</h2>
+                <form method="POST" action="{{ url_for("patient_login") }}">
+                    {{ patient_form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ patient_form.patient_id.label }}
+                        {{ patient_form.patient_id(class="form-control", placeholder="Enter your Patient ID") }}
+                    </div>
+                    {{ patient_form.submit(class="submit-btn") }}
+                </form>
+
+                {% if patient %}
+                <div class="patient-details">
+                    <h3 class="details-title">My Medical Information</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Age</span>
+                            <span class="detail-value">{{ patient.age }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Blood Group</span>
+                            <span class="detail-value">{{ patient.blood_group }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Weight</span>
+                            <span class="detail-value">{{ patient.weight }} kg</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Height</span>
+                            <span class="detail-value">{{ patient.height }} cm</span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Disease/Condition</span>
+                            <span class="detail-value">{{ patient.disease }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLoginForm(type, event) {
+            document.querySelectorAll('.login-type-btn').forEach(btn => btn.classList.remove('active'));
+        
+            event.target.classList.add('active');
+        
+            document.querySelectorAll('.login-section').forEach(section => section.classList.remove('active'));
+        
+            document.getElementById(type + '-login').classList.add('active');
+        }
+
+        setTimeout(function () {
+            let messages = document.querySelectorAll('.error-message');
+            messages.forEach(msg => {
+                msg.style.transition = "opacity 0.5s";
+                msg.style.opacity = "0";
+                setTimeout(() => msg.remove(), 500);
+            });
+        }, 3000);
+        
+    </script>
+{% endblock body %}
