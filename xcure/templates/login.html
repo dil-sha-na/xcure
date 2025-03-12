@@ -216,7 +216,7 @@ body {
             <!-- Doctor Login Section -->
             <div id="doctor-login" class="login-section active">
                 <h2 class="section-title">Doctor Login</h2>
-                <form method="POST" action="{{ url_for("doctor_login") }}">
+                <form method="POST" action="{{ url_for("login_page") }}">
                     {{ doctor_form.hidden_tag() }}
                     <div class="form-group">
                         {{ doctor_form.doctor_id.label }}
@@ -233,7 +233,7 @@ body {
             <!-- Patient Login Section -->
             <div id="patient-login" class="login-section">
                 <h2 class="section-title">Patient Login</h2>
-                <form method="POST" action="{{ url_for("patient_login") }}">
+                <form method="POST" action="{{ url_for("login_page") }}">
                     {{ patient_form.hidden_tag() }}
                     <div class="form-group">
                         {{ patient_form.patient_id.label }}
@@ -241,34 +241,6 @@ body {
                     </div>
                     {{ patient_form.submit(class="submit-btn") }}
                 </form>
-
-                {% if patient %}
-                <div class="patient-details">
-                    <h3 class="details-title">My Medical Information</h3>
-                    <div class="details-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">Age</span>
-                            <span class="detail-value">{{ patient.age }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Blood Group</span>
-                            <span class="detail-value">{{ patient.blood_group }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Weight</span>
-                            <span class="detail-value">{{ patient.weight }} kg</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Height</span>
-                            <span class="detail-value">{{ patient.height }} cm</span>
-                        </div>
-                        <div class="detail-item full-width">
-                            <span class="detail-label">Disease/Condition</span>
-                            <span class="detail-value">{{ patient.disease }}</span>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>

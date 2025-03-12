@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Regexp
 
 class DoctorSignupForm(FlaskForm):
@@ -50,8 +50,10 @@ class DoctorSignupForm(FlaskForm):
 class DoctorLoginForm(FlaskForm):
     doctor_id = StringField("Doctor ID", validators=[DataRequired(), Length(min=4, max=20)])
     password = PasswordField("Password", validators=[DataRequired()])
+    user_type = HiddenField('User Type', default='doctor') 
     submit = SubmitField("Login")
 
 class PatientLoginForm(FlaskForm):
     patient_id = StringField("Patient ID", validators=[DataRequired(), Length(min=3, max=20)])
+    user_type = HiddenField('User Type', default='doctor') 
     submit = SubmitField("View My Details")
