@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify
 from extensions import db, bcrypt, login_manager
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
@@ -64,13 +64,13 @@ def login_page():
                 doctor = Account.query.filter_by(user_id=doctor_id, user_role="doctor").first()
                 if doctor and doctor.check_password(password):
                     login_user(doctor)  
+                    session["doctor_name"] = doctor.first_name +  doctor.last_name
                     flash("Doctor login successful!", "success")
                     return redirect(url_for('doctor_dashboard'))
                 else:
                     flash("Invalid Doctor ID or password", "danger")
 
-        elif 'patient_submit' in request.form: 
-            print("patient")
+        else: 
             if patient_form.validate_on_submit():
                 patient_id = patient_form.patient_id.data
 
@@ -85,31 +85,129 @@ def login_page():
 
 @app.route('/doctor/dashboard')
 def doctor_dashboard():
-    return render_template('doctor_dashboard.html')
+    from forms import PatientForm, XRayForm, PrescriptionForm
+    patient_form = PatientForm()
+    prescription_form = PrescriptionForm()
+    xray_form = XRayForm()
+    return render_template(
+        'doctor_dashboard.html', 
+        prescription_form=prescription_form, 
+        patient_form=patient_form, 
+        xray_form=xray_form
+    )
 
-@app.route('/search-patient', methods=['GET'])
-def search_patient():
-    return render_template('doctor_dashboard.html')
-
-@app.route('/edit-patient/<patient_id>', methods=['GET', 'POST'])
-def edit_patient(patient_id):
-    pass
-
-@app.route('/delete-patient/<patient_id>')
-def delete_patient(patient_id):
-    pass
-
-@app.route('/patient-dashboard', methods=['GET', 'POST'])
-def patient_dashboard():
-    pass
-
-@app.route('/add-patient', methods=['POST'])
+@app.route('/add_patient', methods=['POST'])
+@login_required
 def add_patient():
-    pass
+    if current_user.user_role != "doctor":
+        flash("Access denied. You are not a doctor.", "danger")
+        return redirect(url_for('login_page'))
+    
+    from forms import PatientForm
 
-@app.route('/view_patient', methods=['GET', 'POST'])
+    form = PatientForm(request.form)
+    if form.validate_on_submit():
+        patient = Account(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            phone_number=form.phone_number.data,
+            blood_group=form.blood_group.data,
+            user_role="patient"
+        )
+        patient.set_password(patient.first_name+"123")
+        db.session.add(patient)
+        db.session.commit()
+        return jsonify({"status": "success", "message": f"Patient {patient.first_name} {patient.last_name} added successfully! \n Patient Id:- {patient.user_id}"})
+    errors = {field: error[0] for field, error in form.errors.items()}
+    return jsonify({"status": "error", "errors": errors})
+
+
 def view_patient():
     pass
+
+@app.route('/add_prescription', methods=['GET', 'POST'])
+@login_required
+def add_prescription():
+    if current_user.user_role != "doctor":
+        flash("Access denied. You are not a doctor.", "danger")
+        return redirect(url_for('login_page'))
+    
+    from forms import PrescriptionForm
+
+    form = PrescriptionForm()
+    if form.validate_on_submit():
+        prescription = MedicalReport(
+            patient_id=form.patient_id.data,
+            doctor_id=current_user.id,
+            diagnosis=form.diagnosis.data,
+            prescription=form.prescription.data
+        )
+        db.session.add(prescription)
+        db.session.commit()
+        flash("Prescription added successfully!", "success")
+        return redirect(url_for('doctor_dashboard'))
+
+    return render_template('doctor_dashboard.html', prescription_form=form)
+
+@app.route('/add_xray', methods=['GET', 'POST'])
+@login_required
+def add_xray():
+    if current_user.user_role != "doctor":
+        flash("Access denied. You are not a doctor.", "danger")
+        return redirect(url_for('login_page'))
+    
+    from forms import XRayForm
+
+    form = XRayForm()
+    if form.validate_on_submit():
+        xray = XRay(
+            patient_id=form.patient_id.data,
+            image_path=form.image.data.filename
+        )
+        db.session.add(xray)
+        db.session.commit()
+        flash("X-Ray details added successfully!", "success")
+        return redirect(url_for('doctor_dashboard'))
+
+    return render_template('doctor_dashboard.html', xray_form=form)
+
+@app.route('/search_patient', methods=['GET'])
+@login_required
+def search_patient():
+    if current_user.user_role != "doctor":
+        flash("Access denied. You are not a doctor.", "danger")
+        return redirect(url_for('login_page'))
+
+    patient_id = request.args.get('patient_id')
+    patient = Account.query.filter_by(user_id=patient_id, user_role="patient").first()
+    if patient:
+        return render_template('view_patient.html', patient=patient)
+    else:
+        flash("Patient not found.", "danger")
+        return redirect(url_for('doctor_dashboard'))
+    
+@app.route('/search_disease', methods=['GET'])
+@login_required
+def search_disease():
+    if current_user.user_role != "doctor":
+        flash("Access denied. You are not a doctor.", "danger")
+        return redirect(url_for('login_page'))
+
+    disease = request.args.get('disease')
+    patients = Account.query.join(MedicalReport).filter(MedicalReport.diagnosis.ilike(f"%{disease}%")).all()
+    return render_template('doctor_dashboard.html', patients=patients)
+
+@app.route('/list_patients_by_blood_group', methods=['GET'])
+@login_required
+def list_patients_by_blood_group():
+    if current_user.user_role != "doctor":
+        flash("Access denied. You are not a doctor.", "danger")
+        return redirect(url_for('login_page'))
+
+    blood_group = request.args.get('blood_group')
+    patients = Account.query.filter_by(blood_group=blood_group, user_role="patient").all()
+    return render_template('doctor_dashboard.html', patients=patients)  
 
 if __name__ == '__main__':
     with app.app_context():

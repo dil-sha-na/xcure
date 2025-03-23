@@ -10,7 +10,7 @@ class Account(UserMixin, db.Model):
     first_name = db.Column(db.String(200), nullable=True)
     last_name = db.Column(db.String(200), nullable=True)
     email= db.Column(db.String(200), nullable=False)
-    password= db.Column(db.String(200), nullable=False)
+    password= db.Column(db.String(200), nullable=True)
     date_of_birth = db.Column(db.String(200), nullable=True)
     phone_number = db.Column(db.String(15), nullable=True)
     user_id = db.Column(db.String(200), nullable=False, unique=True)
@@ -74,3 +74,4 @@ class XRay(db.Model):
 
     def __repr__(self):
         return f"<XRay for Report {self.report_id}>"
+

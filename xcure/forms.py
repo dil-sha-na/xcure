@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, HiddenField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Regexp
+from wtforms import StringField, PasswordField, SubmitField, HiddenField, FileField, TextAreaField, IntegerField, EmailField, SelectField, DateField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Regexp, Optional
+from flask_wtf.file import FileAllowed
 
 class DoctorSignupForm(FlaskForm):
     first_name = StringField(
@@ -57,3 +58,37 @@ class PatientLoginForm(FlaskForm):
     patient_id = StringField("Patient ID", validators=[DataRequired(), Length(min=3, max=20)])
     user_type = HiddenField('User Type', default='doctor') 
     submit = SubmitField("View My Details")
+
+class XRayForm(FlaskForm):
+    image = FileField('X-Ray Image', validators=[DataRequired(), FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')])
+    submit = SubmitField('Upload X-Ray')
+
+class PrescriptionForm(FlaskForm):
+    patient_id = IntegerField('Patient ID', validators=[DataRequired()])
+    diagnosis = TextAreaField('Diagnosis', validators=[DataRequired()])
+    prescription = TextAreaField('Prescription')
+    submit = SubmitField('Add Prescription')
+
+class PatientForm(FlaskForm):
+    first_name = StringField("First Name", validators=[DataRequired()])
+    last_name = StringField("Last Name", validators=[Optional()])
+    email = EmailField("Email", validators=[DataRequired(), Email()])
+    blood_group = SelectField(
+        "Blood Group",
+        choices=[
+            ("A+", "A+"), ("A-", "A-"),
+            ("B+", "B+"), ("B-", "B-"),
+            ("O+", "O+"), ("O-", "O-"),
+            ("AB+", "AB+"), ("AB-", "AB-")
+        ],
+        validators=[DataRequired()]
+    )
+    date_of_birth = DateField("Date of birth", validators=[DataRequired()])
+    phone_number = StringField(
+        "Phone Number",
+        validators=[
+            Optional(),
+            Regexp(r'^\+?\d{10,15}$', message="Enter a valid phone number.")
+        ]
+    )
+    submit = SubmitField("Add Patient")
