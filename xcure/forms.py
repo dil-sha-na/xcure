@@ -11,7 +11,7 @@ class DoctorSignupForm(FlaskForm):
             Length(max=100)
         ],
     )
-        
+       
     last_name = StringField(
         "Last Name",
         validators=[

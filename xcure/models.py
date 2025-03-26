@@ -6,6 +6,8 @@ from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class Account(UserMixin, db.Model):
+    __tablename__ = 'account'
+    
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(200), nullable=True)
     last_name = db.Column(db.String(200), nullable=True)
@@ -18,9 +20,20 @@ class Account(UserMixin, db.Model):
     blood_group = db.Column(db.String(5), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    reports = relationship("MedicalReport", back_populates="patient", foreign_keys="MedicalReport.patient_id", lazy=True)
-    created_reports = relationship("MedicalReport", back_populates="created_by", foreign_keys="MedicalReport.doctor_id", lazy=True)
+    
+    received_documents = db.relationship(
+        'Document',
+        foreign_keys='Document.patient_id',
+        back_populates='patient',
+        lazy=True
+    )
+    
+    uploaded_documents = db.relationship(
+        'Document',
+        foreign_keys='Document.doctor_id',
+        back_populates='doctor',
+        lazy=True
+    )
 
     def __repr__(self):
         return f"<Account {self.first_name}>"
@@ -48,30 +61,26 @@ def generate_user_id(mapper, connection, target):
 
 event.listen(Account, 'before_insert', generate_user_id)
 
-class MedicalReport(db.Model):
+class Document(db.Model):
+    __tablename__ = 'document'
+    
+    
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    file_path = db.Column(db.String(500), nullable=False)
+    upload_by = db.Column(db.String(200), nullable=False)
+    upload_at = db.Column(db.DateTime, default=datetime.utcnow)
     patient_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     doctor_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
-    diagnosis = db.Column(db.Text, nullable=False)
-    prescription = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Explicitly specify foreign_keys in relationships
-    patient = relationship("Account", foreign_keys=[patient_id], back_populates="reports")
-    created_by = relationship("Account", foreign_keys=[doctor_id], back_populates="created_reports")
-    xrays = relationship("XRay", back_populates="report")
-
-
-class XRay(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    report_id = db.Column(db.Integer, db.ForeignKey('medical_report.id'), nullable=False)
-    image_path = db.Column(db.String(255), nullable=False)  
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    report = relationship("MedicalReport", back_populates="xrays")
-
-    def __repr__(self):
-        return f"<XRay for Report {self.report_id}>"
-
+    
+    patient = db.relationship(
+        'Account',
+        foreign_keys=[patient_id],
+        back_populates='received_documents'
+    )
+    
+    doctor = db.relationship(
+        'Account',
+        foreign_keys=[doctor_id],
+        back_populates='uploaded_documents'
+    )
