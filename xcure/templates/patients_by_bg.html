@@ -1,0 +1,152 @@
+{% extends "base.html" %} {% block inline_css %} body { font-family: Arial,
+sans-serif; margin: 0; padding: 0; background: #f8f9fa; min-height: 100vh; }
+.navbar { background-color: rgba(20, 184, 166, 0.95); padding: 15px 0; width:
+100%; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); } .nav-container { display:
+flex; justify-content: space-between; align-items: center; max-width: 1200px;
+margin: 0 auto; padding: 0 20px; } .nav-brand { color: white; font-size: 24px;
+font-weight: 900; text-decoration: none; letter-spacing: 2px; } .nav-right {
+display: flex; align-items: center; gap: 20px; } .doctor-name { color: white;
+font-weight: 500; } .logout-btn { padding: 8px 16px; background: white; color:
+#14b8a6; border: none; border-radius: 4px; font-weight: bold; text-decoration:
+none; transition: all 0.3s; } .logout-btn:hover { background: #f1f1f1; }
+.dashboard-container { display: flex; max-width: 1200px; margin: 40px auto;
+background: #fff; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+min-height: 600px; } .sidebar { width: 280px; background: #2c3e50; padding:
+30px; border-radius: 10px 0 0 10px; } .sidebar-title { color: white; font-size:
+20px; font-weight: bold; margin-bottom: 25px; padding-bottom: 15px;
+border-bottom: 2px solid #14b8a6; } .menu-btn { display: block; width: 100%;
+padding: 15px 20px; margin-bottom: 15px; background: transparent; border: 2px
+solid #14b8a6; border-radius: 8px; color: white; font-size: 16px; font-weight:
+bold; cursor: pointer; transition: all 0.3s; text-align: left; }
+.menu-btn:hover, .menu-btn.active { background: #14b8a6; } .content-container {
+flex: 1; padding: 40px; } .content-section { display: none; }
+.content-section.active { display: block; } .section-title { color: #2c3e50;
+font-size: 28px; font-weight: bold; margin-bottom: 30px; padding-bottom: 15px;
+border-bottom: 2px solid #14b8a6; } /* Add Patient Form Styles */ .form-group {
+margin-bottom: 20px; } .form-group label { display: block; color: #2c3e50;
+margin-bottom: 8px; font-weight: 500; } .form-group input, .form-group textarea,
+.form-group select { width: 100%; padding: 12px; border: 2px solid #e9ecef;
+border-radius: 6px; font-size: 16px; transition: border-color 0.3s; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+border-color: #14b8a6; outline: none; } .submit-btn { padding: 14px 28px;
+background: #14b8a6; color: white; border: none; border-radius: 6px; font-size:
+16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+.submit-btn:hover { background: #0d9488; } /* Patient List Styles */
+.patient-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.patient-table th, .patient-table td { padding: 12px; text-align: left;
+border-bottom: 1px solid #e9ecef; } .patient-table th { background: #f8f9fa;
+color: #2c3e50; font-weight: bold; } .patient-table tr:hover { background:
+#f8f9fa; } .action-btn { padding: 6px 12px; border: none; border-radius: 4px;
+font-weight: 500; cursor: pointer; transition: background 0.3s; } .view-btn {
+background: #14b8a6; color: white; } .edit-btn { background: #3498db; color:
+white; } .delete-btn { background: #e74c3c; color: white; } .action-btn:hover {
+opacity: 0.9; } .search-form { max-width: 500px; margin-bottom: 30px; }
+.search-input-group { display: flex; gap: 10px; } .search-input-group input {
+flex: 1; } .search-input-group .submit-btn { width: auto; padding: 12px 24px; }
+.patient-details { background: #f8f9fa; padding: 30px; border-radius: 10px;
+margin-top: 30px; } .details-title { color: #2c3e50; font-size: 24px;
+margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #14b8a6; }
+.details-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+margin-bottom: 30px; } .detail-item { display: flex; flex-direction: column;
+gap: 5px; } .detail-item.full-width { grid-column: 1 / -1; } .detail-label {
+color: #64748b; font-size: 14px; font-weight: 500; } .detail-value { color:
+#2c3e50; font-size: 16px; font-weight: 600; } .action-buttons { display: flex;
+gap: 15px; margin-top: 20px; } .error-message { color: #e74c3c; padding: 12px;
+border-radius: 6px; margin-top: 20px; text-align: center; } .blood-group-filter
+{ margin-bottom: 30px; } .blood-group-options { display: flex; flex-wrap: wrap;
+gap: 10px; } .bg-option { padding: 8px 16px; background: #e9ecef; border-radius:
+20px; text-decoration: none; color: #2c3e50; transition: all 0.3s; }
+.bg-option:hover { background: #dee2e6; } .bg-option.active { background:
+#14b8a6; color: white; } .clear-filter { background: #f8f9fa; border: 1px solid
+#dee2e6; } .patient-results { margin-top: 20px; } {% endblock inline_css %} {%
+block body %}
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">XCURE DOCTOR DASHBOARD</a>
+    <div class="nav-right">
+      <span class="doctor-name">Dr. {{ doctor_name }}</span>
+      <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard-container">
+  <div class="sidebar">
+    <h2 class="sidebar-title">Dashboard Menu</h2>
+    <button
+      class="menu-btn {% if active_section == 'patient-search' %}active{% endif %}"
+      onclick="window.location.href='{{ url_for('doctor_dashboard') }}'"
+    >
+      Patient Search
+    </button>
+    <button
+      class="menu-btn {% if active_section == 'add-patient' %}active{% endif %}"
+      onclick="window.location.href='{{ url_for('add_patient') }}'"
+    >
+      Add New Patient
+    </button>
+    <button
+      class="menu-btn {% if active_section == 'patients-by-bg' %}active{% endif %}"
+      onclick="window.location.href='{{ url_for('patients_by_bg') }}'"
+    >
+      Patient List
+    </button>
+  </div>
+
+  <div class="content-container">
+    <div
+      class="content-section {% if active_section == 'patients-by-bg' %}active{% endif %}"
+      id="patients-by-bg"
+    >
+      <h2 class="section-title">Patients by Blood Group</h2>
+
+      <div class="blood-group-filter">
+        <div class="blood-group-options">
+          {% for bg in blood_groups %}
+          <a
+            href="{{ url_for('patients_by_bg', bg=bg) }}"
+            class="bg-option {% if selected_bg == bg %}active{% endif %}"
+          >
+            {{ bg }}
+          </a>
+          {% endfor %}
+
+          <a
+            href="{{ url_for('patients_by_bg') }}"
+            class="bg-option clear-filter"
+          >
+            Clear Filter
+          </a>
+        </div>
+      </div>
+
+      {% if patients %}
+      <div class="patient-results">
+        <table class="patient-table">
+          <thead>
+            <tr>
+              <th>Patient ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for patient in patients %}
+            <tr>
+              <td>{{ patient.user_id }}</td>
+              <td>{{ patient.first_name }} {{ patient.last_name }}</td>
+              <td>{{ patient.email }}</td>
+              <td>{{ patient.phone_number }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% elif selected_bg %}
+      <p>No patients found with blood group: {{ selected_bg }}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock body %}
