@@ -4,6 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 import os, time
+from flask_wtf.csrf import CSRFProtect
 
 
 # Configure upload folder
@@ -19,7 +20,7 @@ from datetime import datetime
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = 'excure2025'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db' 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 @app.template_filter('format_datetime')
@@ -40,6 +41,22 @@ migrate = Migrate(app, db)
 @login_manager.user_loader
 def load_user(user_id):
     return Account.query.get(int(user_id)) if user_id else None 
+
+
+@app.template_filter("age")
+def calculate_age(date_of_birth):
+    if isinstance(date_of_birth, str):  
+        date_of_birth = datetime.strptime(
+            date_of_birth, "%Y-%m-%d"
+        ) 
+    today = datetime.today()
+    age = today.year - date_of_birth.year
+    if today.month < date_of_birth.month or (
+        today.month == date_of_birth.month and today.day < date_of_birth.day
+    ):
+        age -= 1
+    return age
+
 
 @app.route('/')
 def index():
@@ -121,6 +138,38 @@ def patient_dashboard():
     )
     return render_template('patient_dashboard.html', active_section="dashboard",patient=patient)
 
+
+@app.route("/patient/prescription", methods=["POST"])
+def add_prescription():
+    from models import Prescription
+    data = request.get_json()
+
+    patient_id = data.get("patient_id")
+    prescription_text = data.get("prescription")
+
+
+    try:
+        prescription = Prescription(
+            patient_id=patient_id,
+            doctor_id=current_user.id,
+            prescription=prescription_text,
+        )
+        db.session.add(prescription)
+        db.session.commit()
+
+        return jsonify(
+            {"status": "success", "message": "Prescription added successfully!"}
+        )
+    except Exception as e:
+        db.session.rollback() 
+        return jsonify(
+            {
+                "status": "error",
+                "message": f"An error occurred while adding the prescription: {str(e)}",
+            }
+        )
+
+
 @app.route('/download-document/<int:doc_id>')
 @login_required
 def download_document(doc_id):
@@ -157,20 +206,31 @@ def delete_document(doc_id):
 @app.route('/doctor/dashboard')
 def doctor_dashboard():
     patient_id = request.args.get('patient_id')
-    
+    from models import Prescription
+
     if patient_id:
-        patient = Account.query.options(
-            db.joinedload(Account.received_documents).joinedload(Document.doctor)
-        ).filter_by(user_id=patient_id, user_role="patient").first()
+        patient = (
+            Account.query.options(
+                db.joinedload(Account.received_documents).joinedload(Document.doctor),
+                db.joinedload(Account.prescriptions).joinedload(Prescription.doctor),
+            )
+            .filter_by(user_id=patient_id, user_role="patient")
+            .first()
+        )
         
+        prescriptions = []
+        if patient:
+            prescriptions = [p.to_dict() for p in patient.prescriptions]
+
         return render_template(
             'doctor_dashboard.html', 
             active_section="patient-search",
             patient=patient,
             has_patient=bool(patient),
-            searched_id=patient_id
+            searched_id=patient_id,
+            prescriptions=prescriptions
         )
-    
+
     return render_template(
         'doctor_dashboard.html', 
         active_section="patient-search"
@@ -265,7 +325,8 @@ def add_patient():
                 email=form.email.data,
                 phone_number=form.phone_number.data,
                 blood_group=form.blood_group.data,
-                user_role="patient"
+                user_role="patient",
+                date_of_birth=form.date_of_birth.data
             )
             patient.set_password(patient.first_name+"123")
             db.session.add(patient)
@@ -278,32 +339,33 @@ def add_patient():
         return render_template('add_patient.html',patient_form=form,active_section="add-patient")
 
 
-@app.route("/doctor/add_patient", methods=["PUT"])
+@app.route("/doctor/update_patient", methods=["PUT"])
 @login_required
 def update_patient():
-    from forms import PatientForm
-    form = PatientForm(request.form)
-    if form.validate_on_submit():
-        patient = Account(
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            email=form.email.data,
-            phone_number=form.phone_number.data,
-            blood_group=form.blood_group.data,
-            user_role="patient",
-        )
-        patient.set_password(patient.first_name + "123")
-        db.session.add(patient)
+    if request.method == "PUT":
+        data = request.get_json()  
+
+        patient_id = data.get("patient_id")
+        patient = Account.query.get(patient_id) 
+
+        if not patient:
+            return jsonify({"status": "error", "message": "Patient not found"})
+
+        patient.first_name = data.get("first_name", patient.first_name)
+        patient.last_name = data.get("last_name", patient.last_name)
+        patient.email = data.get("email", patient.email)
+        patient.phone_number = data.get("phone_number", patient.phone_number)
+        patient.date_of_birth = data.get("date_of_birth", patient.date_of_birth)
+        patient.blood_group = data.get("blood_group", patient.blood_group)
+
         db.session.commit()
+
         return jsonify(
             {
                 "status": "success",
-                "message": f"Patient {patient.first_name} {patient.last_name} added successfully! \n Patient Id:- {patient.user_id}",
+                "message": f"Patient {patient.first_name} {patient.last_name} updated successfully!",
             }
         )
-    else:
-        errors = {field: error[0] for field, error in form.errors.items()}
-        return jsonify({"status": "error", "errors": errors})
 
 
 @app.route('/search_patient', methods=['GET'])

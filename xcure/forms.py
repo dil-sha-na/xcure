@@ -65,7 +65,6 @@ class XRayForm(FlaskForm):
 
 class PrescriptionForm(FlaskForm):
     patient_id = IntegerField('Patient ID', validators=[DataRequired()])
-    diagnosis = TextAreaField('Diagnosis', validators=[DataRequired()])
     prescription = TextAreaField('Prescription')
     submit = SubmitField('Add Prescription')
 
