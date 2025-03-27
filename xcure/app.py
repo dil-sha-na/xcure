@@ -94,9 +94,10 @@ def login_page():
                     return redirect(url_for('doctor_dashboard'))
                 else:
                     flash("Invalid Doctor ID or password", "error")
-
+        
         else: 
             if patient_form.validate_on_submit():
+                print("thousi")
                 patient_id = patient_form.patient_id.data
 
                 patient = Account.query.filter_by(user_id=patient_id, user_role="patient").first()
@@ -107,6 +108,18 @@ def login_page():
                 else:
                     flash("Invalid Patient ID", "error")
     return render_template("login.html", doctor_form=doctor_form, patient_form=patient_form)
+
+@app.route('/patient/dashboard')
+@login_required
+def patient_dashboard():
+    patient = (
+        Account.query.options(
+            db.joinedload(Account.received_documents).joinedload(Document.doctor)
+        )
+        .filter_by(id=current_user.id, user_role="patient")
+        .first()
+    )
+    return render_template('patient_dashboard.html', active_section="dashboard",patient=patient)
 
 @app.route('/download-document/<int:doc_id>')
 @login_required
@@ -216,7 +229,6 @@ def upload_document():
     return redirect(request.referrer)
 
 
-
 @app.route('/doctor/patients')
 def patients_by_bg():
     blood_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
@@ -264,7 +276,35 @@ def add_patient():
             return jsonify({"status": "error", "errors": errors})
     else:   
         return render_template('add_patient.html',patient_form=form,active_section="add-patient")
-   
+
+
+@app.route("/doctor/add_patient", methods=["PUT"])
+@login_required
+def update_patient():
+    from forms import PatientForm
+    form = PatientForm(request.form)
+    if form.validate_on_submit():
+        patient = Account(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            phone_number=form.phone_number.data,
+            blood_group=form.blood_group.data,
+            user_role="patient",
+        )
+        patient.set_password(patient.first_name + "123")
+        db.session.add(patient)
+        db.session.commit()
+        return jsonify(
+            {
+                "status": "success",
+                "message": f"Patient {patient.first_name} {patient.last_name} added successfully! \n Patient Id:- {patient.user_id}",
+            }
+        )
+    else:
+        errors = {field: error[0] for field, error in form.errors.items()}
+        return jsonify({"status": "error", "errors": errors})
+
 
 @app.route('/search_patient', methods=['GET'])
 @login_required

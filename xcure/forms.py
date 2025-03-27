@@ -49,14 +49,14 @@ class DoctorSignupForm(FlaskForm):
     submit = SubmitField("Register")
 
 class DoctorLoginForm(FlaskForm):
-    doctor_id = StringField("Doctor ID", validators=[DataRequired(), Length(min=4, max=20)])
+    doctor_id = StringField("Doctor ID", validators=[DataRequired(), Length(min=4, max=200)])
     password = PasswordField("Password", validators=[DataRequired()])
     user_type = HiddenField('User Type', default='doctor') 
     submit = SubmitField("Login")
 
 class PatientLoginForm(FlaskForm):
-    patient_id = StringField("Patient ID", validators=[DataRequired(), Length(min=3, max=20)])
-    user_type = HiddenField('User Type', default='doctor') 
+    patient_id = StringField("Patient ID", validators=[DataRequired(), Length(min=3, max=200)])
+    user_type = HiddenField('User Type', default='patient') 
     submit = SubmitField("View My Details")
 
 class XRayForm(FlaskForm):

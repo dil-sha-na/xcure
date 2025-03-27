@@ -122,7 +122,18 @@ center; }
       </form>
 
       {% if has_patient %}
-      <div class="patient-details">
+      <div class="">
+        <div class="action-buttons">
+           <button onclick="openEditModal({
+               id: '{{ patient.id }}',
+               first_name: '{{ patient.first_name }}',
+               last_name: '{{ patient.last_name }}',
+               email: '{{ patient.email }}',
+               phone_number: '{{ patient.phone_number }}',
+               date_of_birth: '{{ patient.date_of_birth }}',
+               blood_group: '{{ patient.blood_group }}'
+           })" class="action-btn edit-btn">Edit Patient</button>
+       </div>
         <h3 class="details-title">Patient Information</h3>
         <div class="details-grid">
           <div class="detail-item">
@@ -138,6 +149,18 @@ center; }
           <div class="detail-item">
             <span class="detail-label">Email:</span>
             <span class="detail-value">{{ patient.email }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date of birth:</span>
+            <span class="detail-value">{{ patient.date_of_birth }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Blood Group:</span>
+            <span class="detail-value">{{ patient.blood_group }}</span>
+          </div>
+            <div class="detail-item">
+            <span class="detail-label">Account Created at:</span>
+            <span class="detail-value">{{ patient.created_at }}</span>
           </div>
         </div>
       </div>
@@ -199,6 +222,67 @@ center; }
       {% endif %}
     </div>
   </div>
+  
+    <!-- Edit Patient Modal -->
+<div id="editPatientModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+    <div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border-radius: 8px; width: 50%; max-width: 600px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: #2c3e50;">Edit Patient Information</h3>
+            <span onclick="closeModal()" style="font-size: 24px; font-weight: bold; cursor: pointer; color: #aaa;">&times;</span>
+        </div>
+        
+        <form id="editPatientForm" method="POST" action="{{ url_for('add_patient') }}">
+            <input type="hidden" id="edit_patient_id" name="patient_id">
+            
+            <div style="display: flex; gap: 20px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_first_name">First Name</label>
+                    <input type="text" id="edit_first_name" name="first_name" class="form-control" required>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_last_name">Last Name</label>
+                    <input type="text" id="edit_last_name" name="last_name" class="form-control" required>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 20px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_email">Email</label>
+                    <input type="email" id="edit_email" name="email" class="form-control" required>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_phone_number">Phone Number</label>
+                    <input type="text" id="edit_phone_number" name="phone_number" class="form-control" required>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 20px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_date_of_birth">Date of Birth</label>
+                    <input type="date" id="edit_date_of_birth" name="date_of_birth" class="form-control" required>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_blood_group">Blood Group</label>
+                    <select id="edit_blood_group" name="blood_group" class="form-control" required>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="closeModal()" style="padding: 10px 20px; background: #e9ecef; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 10px 20px; background: #14b8a6; color: white; border: none; border-radius: 4px; cursor: pointer;">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
 </div>
 <script>
 
@@ -231,5 +315,57 @@ function confirmDelete(doc_id) {
         });
     }
 }
+
+    function openEditModal(patient) {
+    // Populate form fields with patient data
+    document.getElementById('edit_patient_id').value = patient.id;
+    document.getElementById('edit_first_name').value = patient.first_name;
+    document.getElementById('edit_last_name').value = patient.last_name;
+    document.getElementById('edit_email').value = patient.email;
+    document.getElementById('edit_phone_number').value = patient.phone_number;
+    document.getElementById('edit_date_of_birth').value = patient.date_of_birth;
+    document.getElementById('edit_blood_group').value = patient.blood_group;
+    
+    // Show the modal
+    document.getElementById('editPatientModal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('editPatientModal').style.display = 'none';
+}
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    const modal = document.getElementById('editPatientModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
+
+// Handle form submission
+document.getElementById('editPatientForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Patient updated successfully!');
+            closeModal();
+            location.reload();
+        } else {
+            alert('Error updating patient: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating patient');
+    });
+});
 </script>
 {% endblock body %}
