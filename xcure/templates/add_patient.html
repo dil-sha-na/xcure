@@ -340,6 +340,7 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
+       
             <form novalidate id="add-patient-form"  action="{{ url_for("add_patient") }}" method="POST">
                 {{ patient_form.hidden_tag() }}
         
@@ -425,6 +426,7 @@
             displayFormErrors(result.errors);
         }
     });
+
 </script>
 {% endblock body %}
 

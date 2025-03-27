@@ -230,10 +230,9 @@ body {
                 </form>
             </div>
 
-            <!-- Patient Login Section -->
             <div id="patient-login" class="login-section">
                 <h2 class="section-title">Patient Login</h2>
-                <form method="POST" action="{{ url_for("login_page") }}">
+                <form method="POST" action="{{ url_for('login_page') }}">
                     {{ patient_form.hidden_tag() }}
                     <div class="form-group">
                         {{ patient_form.patient_id.label }}
