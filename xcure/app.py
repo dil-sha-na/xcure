@@ -45,17 +45,19 @@ def load_user(user_id):
 
 @app.template_filter("age")
 def calculate_age(date_of_birth):
-    if isinstance(date_of_birth, str):  
-        date_of_birth = datetime.strptime(
-            date_of_birth, "%Y-%m-%d"
-        ) 
-    today = datetime.today()
-    age = today.year - date_of_birth.year
-    if today.month < date_of_birth.month or (
-        today.month == date_of_birth.month and today.day < date_of_birth.day
-    ):
-        age -= 1
-    return age
+    if date_of_birth:
+        if isinstance(date_of_birth, str):  
+            date_of_birth = datetime.strptime(
+                date_of_birth, "%Y-%m-%d"
+            ) 
+        today = datetime.today()
+        age = today.year - date_of_birth.year
+        if today.month < date_of_birth.month or (
+            today.month == date_of_birth.month and today.day < date_of_birth.day
+        ):
+            age -= 1
+        return age
+    return ""
 
 
 @app.route('/')
@@ -129,14 +131,21 @@ def login_page():
 @app.route('/patient/dashboard')
 @login_required
 def patient_dashboard():
+    from models import Prescription
+
     patient = (
         Account.query.options(
-            db.joinedload(Account.received_documents).joinedload(Document.doctor)
+            db.joinedload(Account.received_documents).joinedload(Document.doctor),
+            db.joinedload(Account.prescriptions).joinedload(Prescription.doctor)
         )
         .filter_by(id=current_user.id, user_role="patient")
         .first()
     )
-    return render_template('patient_dashboard.html', active_section="dashboard",patient=patient)
+    prescriptions = []
+    if patient:
+        prescriptions = [p.to_dict() for p in patient.prescriptions]
+
+    return render_template('patient_dashboard.html', active_section="dashboard",patient=patient,prescriptions=prescriptions)
 
 
 @app.route("/patient/prescription", methods=["POST"])

@@ -152,14 +152,29 @@ center; }
             <p>No documents uploaded yet.</p>
             {% endif %}
         </div>
+        <div class="prescription-section">
+<h4 class="details-title">Prescriptions</h4>
+
+<div class="prescriptions-list mt-3">
+{% for prescription in prescriptions %}
+<div class="card mb-2">
+    <div class="card-body">
+        <p class="card-text"><strong>{{ loop.index }}.</strong>{{ prescription.prescription }}</p>
+    </div>
+</div>
+{% else %}
+<p>No prescriptions found for this patient.</p>
+{% endfor %}
+</div>
+</div>
     </div>
     <div id="editPatientModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-    <div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border-radius: 8px; width: 50%; max-width: 600px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="margin: 0; color: #2c3e50;">Edit Information</h3>
-            <span onclick="closeModal()" style="font-size: 24px; font-weight: bold; cursor: pointer; color: #aaa;">&times;</span>
-        </div>
-        
+        <div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border-radius: 8px; width: 50%; max-width: 600px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #2c3e50;">Edit Information</h3>
+                <span onclick="closeModal()" style="font-size: 24px; font-weight: bold; cursor: pointer; color: #aaa;">&times;</span>
+            </div>
+            
         <form id="editPatientForm" method="POST" action="{{ url_for('add_patient') }}">
             <input type="hidden" id="edit_patient_id" name="patient_id">
             
@@ -211,7 +226,9 @@ center; }
             </div>
         </form>
     </div>
+    
 </div>
+
 </div>
 
 <script>
